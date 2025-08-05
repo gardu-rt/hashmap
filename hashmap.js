@@ -23,6 +23,7 @@ class HashMap {
 
     if (bucket.length === 0) {
       bucket.push([key, value]);
+      this.capacity++;
       return;
     }
 
@@ -35,10 +36,6 @@ class HashMap {
 
     bucket.push([key, value]);
     this.capacity++;
-
-    if (this.capacity / this.size >= this.loadFactor) {
-      this.size *= 2;
-    }
   }
 
   get(key) {
@@ -69,16 +66,55 @@ class HashMap {
 
     for (let i = 0; i < bucket.length; i++) {
       if (key === bucket[i][0]) {
+        this.capacity--;
         return bucket.splice(i, 1);
       }
     }
   }
+
+  clear() {
+    this.array = Array.from({ length: 16 }, () => []);
+  }
+
+  keys() {
+    const result = [];
+
+    for (const [key, _] of this.entries()) {
+      result.push(key);
+    }
+
+    return result;
+  }
+
+  entries() {
+    const result = [];
+
+    for (const bucket of this.array) {
+      if (bucket.length > 0) {
+        for (const pair of bucket) {
+          result.push(pair);
+        }
+      }
+    }
+
+    return result;
+  }
 }
 
-const map = new HashMap();
-map.set("cat", 4);
-map.set("tac", 5);
-map.set("cat", 10);
+const test = new HashMap(); // or HashMap() if using a factory
 
-console.log(map.remove("tac"));
-console.log(map);
+test.set("apple", "red");
+test.set("banana", "yellow");
+test.set("carrot", "orange");
+test.set("dog", "brown");
+test.set("elephant", "gray");
+test.set("frog", "green");
+test.set("grape", "purple");
+test.set("hat", "black");
+test.set("ice cream", "white");
+test.set("jacket", "blue");
+test.set("kite", "pink");
+test.set("lion", "golden");
+
+console.log(test.entries());
+console.log(test.keys());
