@@ -36,6 +36,7 @@ class HashMap {
 
     bucket.push([key, value]);
     this.capacity++;
+    if (this.capacity / this.size > this.loadFactor) this.growth();
   }
 
   get(key) {
@@ -63,11 +64,16 @@ class HashMap {
   remove(key) {
     const hashCode = this.hash(key);
     const bucket = this.array[hashCode];
+    let newSize = this.size;
+    if (this.size > 16) newSize = this.size / 2;
 
     for (let i = 0; i < bucket.length; i++) {
       if (key === bucket[i][0]) {
+        bucket.splice(i, 1);
         this.capacity--;
-        return bucket.splice(i, 1);
+        if (this.capacity / newSize <= this.loadFactor) {
+          this.shrink();
+        }
       }
     }
   }
@@ -99,6 +105,40 @@ class HashMap {
 
     return result;
   }
+
+  values() {
+    const result = [];
+
+    for (const [_, values] of this.entries()) {
+      result.push(values);
+    }
+
+    return result;
+  }
+
+  growth() {
+    const newEntries = this.entries();
+    this.size *= 2;
+    this.array = Array.from({ length: this.size }, () => []);
+
+    for (const [key, value] of newEntries) {
+      const hashCode = this.hash(key);
+      const bucket = this.array[hashCode];
+      bucket.push([key, value]);
+    }
+  }
+
+  shrink() {
+    const newEntries = this.entries();
+    this.size = this.size / 2;
+    this.array = Array.from({ length: this.size }, () => []);
+
+    for (const [key, value] of newEntries) {
+      const hashCode = this.hash(key);
+      const bucket = this.array[hashCode];
+      bucket.push([key, value]);
+    }
+  }
 }
 
 const test = new HashMap(); // or HashMap() if using a factory
@@ -115,6 +155,10 @@ test.set("ice cream", "white");
 test.set("jacket", "blue");
 test.set("kite", "pink");
 test.set("lion", "golden");
+test.set("moon", "silver");
 
-console.log(test.entries());
-console.log(test.keys());
+test.remove("ice cream");
+console.log(test);
+// console.log(test.entries());
+// console.log(test.keys());
+// console.log(test.values());
